@@ -2,7 +2,7 @@ import axios from 'axios';
 
 axios.defaults.baseURL = `https://pixabay.com`;
 
-export async function getImages(value, currentPage, signal) {
+export async function getImages(value, currentPage, imagesPerPage, signal) {
   const response = await axios.get('/api/', {
     signal,
     params: {
@@ -11,7 +11,7 @@ export async function getImages(value, currentPage, signal) {
       page: currentPage,
       image_type: 'photo',
       orientation: 'horizontal',
-      per_page: 12,
+      per_page: imagesPerPage,
     },
   });
 

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '../Button/Button';
 import { ImageGallery } from '../ImageGallery/ImageGallery';
 import { Searchbar } from '../Searchbar/Searchbar';
@@ -7,112 +7,96 @@ import { Loader } from '../Loader/Loader';
 import { AppWrapper } from './App.styled';
 import { Error } from 'components/Error/Error';
 
-export class App extends Component {
-  abortCtrl;
+export const App = () => {
+  const [searchValue, setSearchValue] = useState('');
+  const [images, setImages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [status, setStatus] = useState('idle');
+  const [isShowBtn, setIsShowBtn] = useState(false);
+  const abortCtrl = useRef();
+  const imagesPerPage = 12;
 
-  state = {
-    searchValue: '',
-    images: [],
-    currentPage: 1,
-    status: 'idle',
-  };
+  useEffect(() => {
+    if (searchValue === '') return;
 
-  componentDidUpdate(_, prevState) {
-    if (
-      prevState.searchValue !== this.state.searchValue ||
-      prevState.currentPage !== this.state.currentPage
-    ) {
-      this.getImages();
-    }
-  }
+    getImages();
+  }, [searchValue, currentPage]);
 
-  getImages = async () => {
-    const { currentPage, searchValue } = this.state;
-
-    if (this.abortCtrl) {
-      this.abortCtrl.abort();
+  const getImages = async () => {
+    if (abortCtrl.current) {
+      abortCtrl.current.abort();
     }
 
-    this.abortCtrl = new AbortController();
+    abortCtrl.current = new AbortController();
 
     try {
-      this.setState({ status: 'pending' });
+      setStatus('pending');
 
       const images = await API.getImages(
         searchValue,
         currentPage,
-        this.abortCtrl.signal
+        imagesPerPage,
+        abortCtrl.current.signal
       );
 
       if (images.hits.length === 0) {
         throw new Error();
       }
 
-      this.setState(prevState => ({
-        images: [...prevState.images, ...images.hits],
-        status: 'resolved',
-      }));
+      setStatus('resolved');
+      setImages(prevState => [...prevState, ...images.hits]);
+      setIsShowBtn(currentPage < Math.ceil(images.totalHits / imagesPerPage));
     } catch (error) {
-      this.setState({
-        status: 'rejected',
-      });
+      setStatus('rejected');
     }
   };
 
-  onSubmit = searchValue => {
-    if (this.state.searchValue === searchValue) {
+  const onSubmit = query => {
+    if (searchValue === query) {
       return;
     }
 
-    this.setState({
-      searchValue,
-      currentPage: 1,
-      images: [],
-    });
+    setSearchValue(query);
+    setCurrentPage(1);
+    setImages([]);
   };
 
-  onBtnClick = () => {
-    this.setState(prevState => ({
-      currentPage: prevState.currentPage + 1,
-    }));
+  const onBtnClick = () => {
+    setCurrentPage(prevState => prevState + 1);
   };
 
-  render() {
-    const { status, images } = this.state;
-
-    if (status === 'pending') {
-      return (
-        <AppWrapper>
-          <Searchbar onSubmit={this.onSubmit} />
-          <ImageGallery images={images} />
-          <Loader />
-        </AppWrapper>
-      );
-    }
-
-    if (status === 'resolved') {
-      return (
-        <AppWrapper>
-          <Searchbar onSubmit={this.onSubmit} />
-          <ImageGallery images={images} />
-          <Button onClick={this.onBtnClick} />
-        </AppWrapper>
-      );
-    }
-
-    if (status === 'rejected') {
-      return (
-        <AppWrapper>
-          <Searchbar onSubmit={this.onSubmit} />
-          <Error />
-        </AppWrapper>
-      );
-    }
-
+  if (status === 'pending') {
     return (
       <AppWrapper>
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar onSubmit={onSubmit} />
+        <ImageGallery images={images} />
+        <Loader />
       </AppWrapper>
     );
   }
-}
+
+  if (status === 'resolved') {
+    return (
+      <AppWrapper>
+        <Searchbar onSubmit={onSubmit} />
+        <ImageGallery images={images} />
+        {isShowBtn && <Button onClick={onBtnClick} />}
+      </AppWrapper>
+    );
+  }
+
+  if (status === 'rejected') {
+    return (
+      <AppWrapper>
+        <Searchbar onSubmit={onSubmit} />
+        <Error />
+      </AppWrapper>
+    );
+  }
+
+  return (
+    <AppWrapper>
+      <Searchbar onSubmit={onSubmit} />
+    </AppWrapper>
+  );
+};
