@@ -19,37 +19,37 @@ export const App = () => {
   useEffect(() => {
     if (searchValue === '') return;
 
-    getImages();
-  }, [searchValue, currentPage]);
-
-  const getImages = async () => {
-    if (abortCtrl.current) {
-      abortCtrl.current.abort();
-    }
-
-    abortCtrl.current = new AbortController();
-
-    try {
-      setStatus('pending');
-
-      const images = await API.getImages(
-        searchValue,
-        currentPage,
-        imagesPerPage,
-        abortCtrl.current.signal
-      );
-
-      if (images.hits.length === 0) {
-        throw new Error();
+    const getImages = async () => {
+      if (abortCtrl.current) {
+        abortCtrl.current.abort();
       }
 
-      setStatus('resolved');
-      setImages(prevState => [...prevState, ...images.hits]);
-      setIsShowBtn(currentPage < Math.ceil(images.totalHits / imagesPerPage));
-    } catch (error) {
-      setStatus('rejected');
-    }
-  };
+      abortCtrl.current = new AbortController();
+
+      try {
+        setStatus('pending');
+
+        const images = await API.getImages(
+          searchValue,
+          currentPage,
+          imagesPerPage,
+          abortCtrl.current.signal
+        );
+
+        if (images.hits.length === 0) {
+          throw new Error();
+        }
+
+        setStatus('resolved');
+        setImages(prevState => [...prevState, ...images.hits]);
+        setIsShowBtn(currentPage < Math.ceil(images.totalHits / imagesPerPage));
+      } catch (error) {
+        setStatus('rejected');
+      }
+    };
+
+    getImages();
+  }, [searchValue, currentPage]);
 
   const onSubmit = query => {
     if (searchValue === query) {
