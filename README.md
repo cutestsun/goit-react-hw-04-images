@@ -1,2 +1,2 @@
 # 🏞️ React Image Finder 
-(refactored to functional components)
+refactored to functional components
