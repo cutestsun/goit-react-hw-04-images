@@ -1,1 +1,1 @@
-# 📚 React Homework 4 (Images)
+# 🏞️ React Image Finder (refactored to functional components)
