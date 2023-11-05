@@ -30,11 +30,13 @@ export const Form = styled.form`
 `;
 
 export const Button = styled.button`
-  display: inline-block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 48px;
   height: 48px;
-  border: 0;
-  background-image: url('https://img.icons8.com/ios/50/search--v1.svg');
+  border: none;
+  padding: 0;
   background-size: 60%;
   background-repeat: no-repeat;
   background-position: center;
@@ -58,13 +60,14 @@ export const ButtonLabel = styled.span`
 
 export const Input = styled.input`
   display: inline-block;
-  width: 100%;
+  flex: 1;
   font: inherit;
   font-size: 20px;
   border: none;
   outline: none;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+
   &::placeholder {
     font: inherit;
     font-size: 18px;

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BsSearch } from 'react-icons/bs';
 import { Form, Header, Button, ButtonLabel, Input } from './Searchbar.styled';
 
 export const Searchbar = ({ onSubmit }) => {
@@ -23,6 +24,7 @@ export const Searchbar = ({ onSubmit }) => {
         <Form onSubmit={onSearchSubmit}>
           <Button type="submit">
             <ButtonLabel>Search</ButtonLabel>
+            <BsSearch size={24} />
           </Button>
 
           <Input
